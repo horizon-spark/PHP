@@ -9,14 +9,18 @@
                 <button type'submit'>Выйти</button>
             </form>";
 
-        $content = file_get_contents('messages.txt');
+        $content = file_get_contents('messages.json');
 
         if (empty($content)) {
             echo "<p>Пока нет ни одной записи</p>";
         }
 
-        $messages = array_filter(explode("\n", $content));
-        foreach($messages as $index => $message) {
+        $lines = array_filter(explode("\n", $content));
+        foreach($lines as $index => $line) {
+            $log = json_decode($line);
+            $message = "ID: $log->id | Имя: $log->name | Дата: " . 
+                $log->date . " | Сообщение: $log->message";
+
             echo "<div class='message'>
                     $message 
                     <a href='admin.php?delete=$index'>Удалить</a>
@@ -39,12 +43,12 @@
         if ($_SESSION['auth'] == true) {
             $delete_index = $_GET['delete'];
 
-            $content = file_get_contents('messages.txt');
-            $messages = array_filter(explode("\n", $content));
-            unset($messages[$delete_index]);
+            $content = file_get_contents('messages.json');
+            $lines = array_filter(explode("\n", $content));
+            unset($lines[$delete_index]);
 
-            $output_content = implode("\n", $messages);
-            file_put_contents('messages.txt', $output_content);
+            $output_content = implode("\n", $lines);
+            file_put_contents('messages.json', $output_content);
 
             header("Location: admin.php");
 
