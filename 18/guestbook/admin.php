@@ -48,7 +48,7 @@
             unset($lines[$delete_index]);
 
             $output_content = implode("\n", $lines);
-            file_put_contents('messages.json', $output_content);
+            file_put_contents('messages.json', $output_content."\n");
 
             header("Location: admin.php");
 
