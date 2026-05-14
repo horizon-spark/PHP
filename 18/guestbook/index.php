@@ -1,4 +1,11 @@
 <?php require_once '../header.php'; ?>
+<?php 
+    echo "<style>
+            form {
+                display: inline;
+            }
+        </style>";
+?>
 
 <?php 
     session_start();
@@ -7,8 +14,9 @@
         if (count($lines) == 0) {
             return;
         }
-
-        if (count($lines) < $show_by || count($lines) % $show_by == 0) {
+        if (count($lines) <= $show_by) {
+            $number_of_pages = 0;
+        } else if (count($lines) % $show_by == 0) {
             $number_of_pages = (int)(count($lines) / $show_by);
         } else {
             $number_of_pages = (int)(count($lines) / $show_by) + 1;
@@ -41,8 +49,8 @@
         }
         for ($i = $partition_start; $i < $partition_end; $i++) {
             $log = json_decode($lines[$i]);
-            $message = "ID: $log->id | Имя: $log->name | Дата: " . 
-                $log->date . " | Сообщение: $log->message";
+            $message = "ID: $log->id | Имя: $log->name | email: $log->email |
+                Дата: " . $log->date . " | Сообщение: $log->message";
 
             echo "<div class='message'>$message</div>";
         }
@@ -50,16 +58,32 @@
 
     $counter = $_SESSION['counter'] ?? 1;
 
-    if (isset($_POST['name']) && isset($_POST['message'])) {
-        if (!empty($_POST['name']) && !empty($_POST['message'])) {
+    if (isset($_POST['name']) && 
+        isset($_POST['message']) &&
+        isset($_POST['email'])) {
+
+        if (!empty($_POST['name']) && 
+            !empty($_POST['message']) &&
+            filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
+                
+            $ip = $_SERVER['REMOTE_ADDR'];
+            if (time() - $_SESSION['last_visit'][$ip] < -1) {
+                $_SESSION['last_visit'][$ip] = time();
+                echo "Подозрительная активность. Форма не отправлена";
+                exit;
+            }
+
             $name = htmlspecialchars($_POST['name']);
             $message = htmlspecialchars($_POST['message']);
+            $email = htmlspecialchars($_POST['email']);
 
             $log = json_encode(['id' => $counter, 'name' => $name, 
-                'message' => $message, 'date' => date("Y-m-d H:i:s")]);
+                'message' => $message, 'email' => $email, 'date' => date("Y-m-d H:i:s")]);
             $log .= "\n";
             $counter++;
+
             $_SESSION['counter'] = $counter;
+            $_SESSION['last_visit'][$ip] = time();
 
             $is_success = file_put_contents('messages.json', $log, FILE_APPEND);
 
@@ -75,6 +99,8 @@
         placeholder="Имя" required>
     <input type="text" name="message" 
         placeholder="Сообщение" required>
+    <input type="email" name="email"
+        placeholder="Email" required>
     <button type="submit">Отправить</button>
 </form>
 

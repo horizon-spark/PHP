@@ -18,8 +18,8 @@
         $lines = array_filter(explode("\n", $content));
         foreach($lines as $index => $line) {
             $log = json_decode($line);
-            $message = "ID: $log->id | Имя: $log->name | Дата: " . 
-                $log->date . " | Сообщение: $log->message";
+            $message = "ID: $log->id | Имя: $log->name | email: $log->email |
+                Дата: " . $log->date . " | Сообщение: $log->message";
 
             echo "<div class='message'>
                     $message 
