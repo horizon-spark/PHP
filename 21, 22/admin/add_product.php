@@ -1,4 +1,6 @@
 <?php 
+    session_start();
+
     require_once 'auth_check.php';
     require_once '../../19/db.php';
 
@@ -34,8 +36,8 @@
                     $affectedRowsNumber = $stmt->execute();
 
                     if ($affectedRowsNumber > 0) {
-                        $_SESSION['is_success'] = true;
-                        header("Location: add_product.php");
+                        $_SESSION['is_successful_insert'] = true;
+                        header("Location: ../../19/index.php");
                     }
                 }
         }
