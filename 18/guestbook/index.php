@@ -56,6 +56,22 @@
         }
     }
 
+    function filter_lines($lines, $search) {
+        $filtered_lines = [];
+
+        foreach ($lines as $line) {
+            $data = json_decode($line);
+
+            if (strpos($data->name, $search) !== false || 
+                strpos($data->message, $search) !== false) {
+
+                $filtered_lines[] = $line;
+            }
+        }
+
+        return $filtered_lines;
+    }
+
     $counter = $_SESSION['counter'] ?? 1;
 
     if (isset($_POST['name']) && 
@@ -94,6 +110,16 @@
     }
 ?>
 
+<form action="" method="GET">
+    <input type="text" name="search"
+        placeholder="Поиск по имени или сообщению"
+        required>
+    <button type="submit">Поиск</button>
+</form>
+<a href="index.php">Очистить поиск</a>
+
+<br><br>
+
 <form action="" method="POST">
     <input type="text" name="name"
         placeholder="Имя" required>
@@ -112,10 +138,21 @@
     }
 
     $lines = array_filter(explode("\n", $content));
+
+    if (isset($_GET['search']) && 
+        !empty($_GET['search'])) {
+
+        $search = htmlspecialchars($_GET['search']);
+
+        $filtered_lines = filter_lines($lines, $search);
+    } else {
+        $filtered_lines = $lines;
+    }
+
     $current_page = $_GET['page'] ?? 0;
 
-    show_partition($lines, 3);
-    pagination($lines, 3, $current_page);
+    show_partition($filtered_lines, 3);
+    pagination($filtered_lines, 3, $current_page);
 
 ?>
 

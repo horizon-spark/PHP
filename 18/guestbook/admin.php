@@ -23,6 +23,7 @@
 
             echo "<div class='message'>
                     $message 
+                    <a href='admin.php?edit=$index'>Редактировать</a>
                     <a href='admin.php?delete=$index'>Удалить</a>
                 </div>";
         }
@@ -37,6 +38,72 @@
     if (isset($_GET['logout'])) {
         session_destroy();
         header("Location: index.php");
+    }
+
+    if (isset($_GET['edit'])) {
+        if ($_SESSION['auth'] == true) {
+            $edit_index = $_GET['edit'];
+
+            $content = file_get_contents('messages.json');
+            $lines = array_filter(explode("\n", $content));
+
+            $edit_line_data = json_decode($lines[$edit_index]) ?? 0;
+
+            if (!$edit_line_data) {
+                echo "Запись с index = $edit_index не найдена";
+            } else {
+                echo "<form action='' method='POST'>
+                        <input 
+                            type='text' 
+                            name='name'
+                            placeholder='Имя' 
+                            value='$edit_line_data->name'
+                            required>
+                        <input 
+                            type='text' 
+                            name='message' 
+                            placeholder='Сообщение' 
+                            value='$edit_line_data->message'
+                            required>
+                        <input 
+                            type='email' 
+                            name='email'
+                            placeholder='Email'
+                            value='$edit_line_data->email'
+                            required>
+                        <button type='submit'>Изменить</button>
+                    </form>";
+            }
+        } else {
+            echo "Авторизуйтесь для редактирования записей";
+        }
+    }
+
+    if (isset($_POST['name']) && 
+        isset($_POST['message']) &&
+        isset($_POST['email'])) {
+
+        if (!empty($_POST['name']) && 
+            !empty($_POST['message']) &&
+            filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
+
+            $name_new = htmlspecialchars($_POST['name']);
+            $message_new = htmlspecialchars($_POST['message']);
+            $email_new = htmlspecialchars($_POST['email']);
+
+            $edit_line_data->name = $name_new;
+            $edit_line_data->message = $message_new;
+            $edit_line_data->email = $email_new;
+
+            $log_new = json_encode($edit_line_data);
+
+            $lines[$edit_index] = $log_new;
+
+            $output_content = implode("\n", $lines);
+            file_put_contents('messages.json', $output_content."\n");
+
+            header("Location: admin.php");
+        }
     }
 
     if (isset($_GET['delete'])) {
