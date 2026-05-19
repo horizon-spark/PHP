@@ -14,9 +14,12 @@
 
     require_once '../19/db.php';
 
-    $sql = "SELECT id, name, price, description 
-            FROM products";
-
+    $sql = "SELECT prod.id, prod.name, 
+                prod.price, prod.description, 
+                cat.title AS category_name 
+            FROM products prod
+                LEFT JOIN categories cat ON prod.category_id = cat.id";
+ 
     $stmt = $conn->prepare($sql);
     $stmt->execute();
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -26,10 +29,12 @@
     } else {
         echo "<div class='container'>";
         foreach($products as $product) {
+            $category = $product['category_name'] ?? "Без категории";
             echo "<div class='card'>
                 <h3>{$product['name']}</h3>
                 Price: <b>{$product['price']}</b><br>
                 Description: <i>{$product['description']}</i>
+                <h4>$category</h4>  
             </div>";
         }
     }
