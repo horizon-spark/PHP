@@ -8,5 +8,6 @@
         echo "<p>Database connection established</p>";
     } catch (PDOException $e) {
         echo "Connection failed: " . $e->getMessage();
+        exit;
     }
 ?>

@@ -10,13 +10,20 @@
             echo "<p>$success_message</p>";
         }
 
+        $saved_name = htmlspecialchars($_POST['name'] ?? '');
+        $saved_message = htmlspecialchars($_POST['message'] ?? '');
+        $saved_user_id = htmlspecialchars($_POST['user_id'] ?? '');
+
         echo "<form action='' method='POST'>
                 <input type='text' name='name'
-                    placeholder='Имя' required>
+                    placeholder='Имя' value='$saved_name' 
+                    required>
                 <input type='text' name='message' 
-                    placeholder='Сообщение' required>
+                    placeholder='Сообщение' value='$saved_message' 
+                    required>
                 <input type='number' name='user_id'
-                    placeholder='ID пользователя' required>
+                    placeholder='ID пользователя' value='$saved_user_id' 
+                    required>
                 <button type='submit'>Отправить</button>
             </form>";
 
