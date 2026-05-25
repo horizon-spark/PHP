@@ -1,38 +1,40 @@
 <?php 
-    function render_view($records, $errors = 0, $success_message = 0) {
-        if ($errors) {
-            foreach ($errors as $error) {
-                echo "<p>$error</p>";
-            }
-        }
-    
-        if ($success_message) {
-            echo "<p>$success_message</p>";
-        }
+    function render_view($records, $is_authorised = false) {
 
-        $saved_name = htmlspecialchars($_POST['name'] ?? '');
-        $saved_message = htmlspecialchars($_POST['message'] ?? '');
-        $saved_user_id = htmlspecialchars($_POST['user_id'] ?? '');
+        if ($is_authorised) {
+            $name = $_SESSION['username'];
+            $user_id = $_SESSION['user_id'];
 
-        echo "<form action='' method='POST'>
-                <input type='text' name='name'
-                    placeholder='Имя' value='$saved_name' 
-                    required>
-                <input type='text' name='message' 
-                    placeholder='Сообщение' value='$saved_message' 
-                    required>
-                <input type='number' name='user_id'
-                    placeholder='ID пользователя' value='$saved_user_id' 
-                    required>
-                <button type='submit'>Отправить</button>
-            </form>";
+            $saved_message = htmlspecialchars($_POST['message'] ?? '');
+
+            echo "<form action='' method='POST'>
+                    <input type='text' name='name'
+                        placeholder='Имя' value='$name' 
+                        readonly required>
+                    <input type='text' name='message' 
+                        placeholder='Сообщение' value='$saved_message' 
+                        required>
+                    <input type='number' name='user_id'
+                        placeholder='ID пользователя' value='$user_id' 
+                        readonly required>
+                    <button type='submit'>Отправить</button>
+                </form>";
+
+        } else {
+            echo "<p>Авторизуйтесь, чтобы оставлять записи</p>";
+        }
 
         foreach ($records as $record) {
             echo "ID: {$record['id']} | Имя: {$record['name']} |
-                Сообщение: {$record['text']} | ID пользователя: {$record['user_id']} |
-                <a href='index.php?delete={$record['id']}'>
-                    Удалить
-                </a><br>";
+                Сообщение: {$record['text']} | ID пользователя: {$record['user_id']}";
+                
+            if ($is_authorised && $user_id == $record['user_id']) {
+                echo " | <a href='index.php?page=index&delete={$record['id']}'>
+                        Удалить
+                    </a><br>";
+            } else {
+                echo "<br>";
+            }
         }
     }
 ?>
